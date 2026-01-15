@@ -129,7 +129,7 @@ export async function PUT(
     await requireEnvironmentWrite(user, data.environment, {
       action: 'UPDATE_MODULE',
       entityType: 'learning_module',
-      entityId: params.id,
+      entityId: id,
     });
   } catch (error) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });

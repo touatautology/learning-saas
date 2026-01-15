@@ -24,6 +24,11 @@ export default function AdminModuleEditorPage({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   async function handleUpdate(formData: FormData) {
+    if (!module) {
+      setStatusMessage('MODULE_NOT_LOADED');
+      return;
+    }
+
     let checklistJson = [];
     try {
       checklistJson = JSON.parse(
