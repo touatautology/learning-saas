@@ -66,6 +66,7 @@ export const runs = pgTable('runs', {
   evaluationJson: jsonb('evaluation_json').notNull(),
   rationale: text('rationale').notNull(),
   status: varchar('status', { length: 20 }).notNull(),
+  commitHash: varchar('commit_hash', { length: 64 }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 

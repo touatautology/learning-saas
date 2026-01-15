@@ -141,6 +141,8 @@ export async function POST(
     actionType: 'PROMOTE',
     environment: 'prod',
   });
+  const commitHash =
+    process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || null;
 
   await db.insert(runs).values({
     actorUserId: user.id,
@@ -153,6 +155,7 @@ export async function POST(
     evaluationJson: evaluation,
     rationale: parsed.data.rationale,
     status: 'promoted',
+    commitHash,
   });
 
   await logAuditEvent({

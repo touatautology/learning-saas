@@ -65,7 +65,7 @@ export default function AdminApprovalsPage() {
       | { ci?: { status?: string } }
       | null
       | undefined;
-    return evaluation?.ci?.status;
+    return evaluation?.ci?.status ?? "missing";
   };
   const formatDiff = (run: Run) =>
     run.diffJson ? JSON.stringify(run.diffJson, null, 2) : "No diff payload.";
@@ -91,7 +91,12 @@ export default function AdminApprovalsPage() {
           <CardContent className="space-y-4">
             {pendingRuns.length ? (
               pendingRuns.map((run) => (
-                <div key={run.id} className="border rounded-md p-4">
+                <div
+                  key={run.id}
+                  className="border rounded-md p-4"
+                  data-run-id={run.id}
+                  data-run-status="proposed"
+                >
                   <p className="font-medium">{run.diffSummary}</p>
                   <p className="text-sm text-muted-foreground">
                     Action: {run.actionType}
@@ -115,9 +120,13 @@ export default function AdminApprovalsPage() {
                   <div className="mt-3 text-xs bg-gray-50 border rounded p-3 overflow-auto">
                     <pre>{formatDiff(run)}</pre>
                   </div>
-                  {getCiStatus(run) !== "passed" ? (
+                  {getCiStatus(run) === "failed" ? (
+                    <p className="text-xs text-rose-600 mt-2">
+                      CI failed. Review before approving.
+                    </p>
+                  ) : getCiStatus(run) === "missing" ? (
                     <p className="text-xs text-amber-600 mt-2">
-                      Warning: CI evaluation is missing or not passing.
+                      CI not recorded yet for this run.
                     </p>
                   ) : null}
                   <div className="mt-3 flex flex-col gap-3">
@@ -129,6 +138,7 @@ export default function AdminApprovalsPage() {
                     <div className="flex gap-2">
                       <Button
                         data-action="approve_run"
+                        data-run-id={run.id}
                         onClick={() => {
                           const input = document.getElementById(
                             `approve_rationale_${run.id}`
@@ -141,6 +151,7 @@ export default function AdminApprovalsPage() {
                       <Button
                         variant="outline"
                         data-action="reject_run"
+                        data-run-id={run.id}
                         onClick={() => {
                           const input = document.getElementById(
                             `approve_rationale_${run.id}`
@@ -169,7 +180,12 @@ export default function AdminApprovalsPage() {
           <CardContent className="space-y-4">
             {approvedRuns.length ? (
               approvedRuns.map((run) => (
-                <div key={run.id} className="border rounded-md p-4">
+                <div
+                  key={run.id}
+                  className="border rounded-md p-4"
+                  data-run-id={run.id}
+                  data-run-status="approved"
+                >
                   <p className="font-medium">{run.diffSummary}</p>
                   <p className="text-sm text-muted-foreground">
                     Approved, ready to promote.
@@ -193,9 +209,13 @@ export default function AdminApprovalsPage() {
                   <div className="mt-3 text-xs bg-gray-50 border rounded p-3 overflow-auto">
                     <pre>{formatDiff(run)}</pre>
                   </div>
-                  {getCiStatus(run) !== "passed" ? (
+                  {getCiStatus(run) === "failed" ? (
+                    <p className="text-xs text-rose-600 mt-2">
+                      CI failed. Review before promoting.
+                    </p>
+                  ) : getCiStatus(run) === "missing" ? (
                     <p className="text-xs text-amber-600 mt-2">
-                      Warning: CI evaluation is missing or not passing.
+                      CI not recorded yet for this run.
                     </p>
                   ) : null}
                   <div className="mt-3 flex flex-col gap-3">
@@ -206,6 +226,7 @@ export default function AdminApprovalsPage() {
                     />
                     <Button
                       data-action="promote_run"
+                      data-run-id={run.id}
                       onClick={() => {
                         const input = document.getElementById(
                           `promote_rationale_${run.id}`
