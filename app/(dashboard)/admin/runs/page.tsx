@@ -25,6 +25,11 @@ export default function AdminRunsPage() {
                 <p className="text-sm text-muted-foreground">
                   Environment: {run.environment}
                 </p>
+                {run.commitHash ? (
+                  <p className="text-sm text-muted-foreground">
+                    Commit: {run.commitHash}
+                  </p>
+                ) : null}
                 <p className="text-sm text-muted-foreground">
                   Summary: {run.diffSummary}
                 </p>

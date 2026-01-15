@@ -322,6 +322,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "commit_hash": {
+          "name": "commit_hash",
+          "type": "varchar",
+          "notNull": false,
+          "primaryKey": false
         }
       },
       "indexes": {},

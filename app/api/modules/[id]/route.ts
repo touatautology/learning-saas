@@ -165,6 +165,8 @@ export async function PUT(
     environment: updated.environment,
   });
   const runStatus = user.role === 'AGENT' ? 'proposed' : 'applied';
+  const commitHash =
+    process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || null;
 
   const [createdRun] = await db.insert(runs).values({
     actorUserId: user.id,
@@ -177,6 +179,7 @@ export async function PUT(
     evaluationJson: evaluation,
     rationale: data.rationale,
     status: runStatus,
+    commitHash,
   }).returning();
 
   if (createdRun) {

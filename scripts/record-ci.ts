@@ -5,16 +5,31 @@ import { runs } from '@/lib/db/schema';
 async function main() {
   const e2eStatus = process.env.CI_E2E_STATUS || 'unknown';
   const rbacStatus = process.env.CI_RBAC_STATUS || 'unknown';
-  const commitHash = process.env.GITHUB_SHA || null;
+  const commitHash =
+    process.env.GITHUB_SHA || process.env.CI_COMMIT_SHA || null;
   const executedAt = process.env.CI_RUN_AT || new Date().toISOString();
+  let targetRun = null;
 
-  const [latest] = await db
-    .select()
-    .from(runs)
-    .orderBy(desc(runs.createdAt))
-    .limit(1);
+  if (commitHash) {
+    const [match] = await db
+      .select()
+      .from(runs)
+      .where(eq(runs.commitHash, commitHash))
+      .orderBy(desc(runs.createdAt))
+      .limit(1);
+    targetRun = match || null;
+  }
 
-  if (!latest) {
+  if (!targetRun) {
+    const [latest] = await db
+      .select()
+      .from(runs)
+      .orderBy(desc(runs.createdAt))
+      .limit(1);
+    targetRun = latest || null;
+  }
+
+  if (!targetRun) {
     console.log('No runs found to update.');
     return;
   }
@@ -23,7 +38,7 @@ async function main() {
     e2eStatus === 'passed' && rbacStatus === 'passed' ? 'passed' : 'failed';
 
   const updatedEvaluation = {
-    ...(latest.evaluationJson || {}),
+    ...(targetRun.evaluationJson || {}),
     ci: {
       status: ciStatus,
       commitHash,
@@ -38,9 +53,9 @@ async function main() {
     .set({
       evaluationJson: updatedEvaluation,
     })
-    .where(eq(runs.id, latest.id));
+    .where(eq(runs.id, targetRun.id));
 
-  console.log(`Updated run ${latest.id} with CI evaluation.`);
+  console.log(`Updated run ${targetRun.id} with CI evaluation.`);
   await client.end({ timeout: 5 });
 }
 
