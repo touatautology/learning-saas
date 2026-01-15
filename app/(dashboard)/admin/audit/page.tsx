@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -21,11 +23,19 @@ type AuditEntry = {
 };
 
 export default function AdminAuditPage() {
-  const { data: logs } = useSWR<AuditEntry[]>("/api/audit", fetcher);
+  const searchParams = useSearchParams();
+  const queryString = useMemo(() => searchParams.toString(), [searchParams]);
+  const requestUrl = queryString ? `/api/audit?${queryString}` : "/api/audit";
+  const { data: logs } = useSWR<AuditEntry[]>(requestUrl, fetcher);
 
   return (
     <section className="flex-1 p-4 lg:p-8" data-page="admin_audit">
       <h1 className="text-lg lg:text-2xl font-medium mb-6">Audit Log</h1>
+      {queryString ? (
+        <p className="text-sm text-muted-foreground mb-4">
+          Filter: {queryString}
+        </p>
+      ) : null}
       <div className="grid gap-4">
         {logs?.length ? (
           logs.map((log) => (

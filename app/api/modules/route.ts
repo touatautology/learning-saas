@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
   });
   const runStatus = user.role === 'AGENT' ? 'proposed' : 'applied';
 
-  await db.insert(runs).values({
+  const [createdRun] = await db.insert(runs).values({
     actorUserId: user.id,
     actorRole: user.role,
     environment: created.environment,
@@ -143,7 +143,20 @@ export async function POST(request: NextRequest) {
     evaluationJson: evaluation,
     rationale: data.rationale,
     status: runStatus,
-  });
+  }).returning();
+
+  if (createdRun) {
+    await logAuditEvent({
+      actorUserId: user.id,
+      actorRole: user.role,
+      action: AuditAction.CREATE_RUN,
+      entityType: 'run',
+      entityId: createdRun.id.toString(),
+      environment: created.environment,
+      success: true,
+      detailsJson: { actionType: createdRun.actionType, status: createdRun.status },
+    });
+  }
 
   await logAuditEvent({
     actorUserId: user.id,

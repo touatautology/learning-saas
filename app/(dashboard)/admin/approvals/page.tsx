@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +67,8 @@ export default function AdminApprovalsPage() {
       | undefined;
     return evaluation?.ci?.status;
   };
+  const formatDiff = (run: Run) =>
+    run.diffJson ? JSON.stringify(run.diffJson, null, 2) : "No diff payload.";
 
   return (
     <section className="flex-1 p-4 lg:p-8" data-page="admin_approvals">
@@ -93,6 +96,25 @@ export default function AdminApprovalsPage() {
                   <p className="text-sm text-muted-foreground">
                     Action: {run.actionType}
                   </p>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    <Link
+                      href={`/admin/runs#run-${run.id}`}
+                      className="text-blue-600 underline"
+                      data-action="view_run"
+                    >
+                      View full run details
+                    </Link>
+                    <Link
+                      href={`/admin/audit?entityType=run&entityId=${run.id}`}
+                      className="text-blue-600 underline"
+                      data-action="view_audit"
+                    >
+                      View audit log entries
+                    </Link>
+                  </div>
+                  <div className="mt-3 text-xs bg-gray-50 border rounded p-3 overflow-auto">
+                    <pre>{formatDiff(run)}</pre>
+                  </div>
                   {getCiStatus(run) !== "passed" ? (
                     <p className="text-xs text-amber-600 mt-2">
                       Warning: CI evaluation is missing or not passing.
@@ -152,6 +174,25 @@ export default function AdminApprovalsPage() {
                   <p className="text-sm text-muted-foreground">
                     Approved, ready to promote.
                   </p>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    <Link
+                      href={`/admin/runs#run-${run.id}`}
+                      className="text-blue-600 underline"
+                      data-action="view_run"
+                    >
+                      View full run details
+                    </Link>
+                    <Link
+                      href={`/admin/audit?entityType=run&entityId=${run.id}`}
+                      className="text-blue-600 underline"
+                      data-action="view_audit"
+                    >
+                      View audit log entries
+                    </Link>
+                  </div>
+                  <div className="mt-3 text-xs bg-gray-50 border rounded p-3 overflow-auto">
+                    <pre>{formatDiff(run)}</pre>
+                  </div>
                   {getCiStatus(run) !== "passed" ? (
                     <p className="text-xs text-amber-600 mt-2">
                       Warning: CI evaluation is missing or not passing.
