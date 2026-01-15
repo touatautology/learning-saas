@@ -7,7 +7,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: '/home/tocoro/.nvm/versions/node/v24.11.1/bin/pnpm dev',
+    command: 'pnpm dev',
     env: {
       PORT: '3002',
       ENABLE_TEST_ENDPOINTS: 'true',
