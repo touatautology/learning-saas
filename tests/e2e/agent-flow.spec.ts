@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 type ModuleSummary = { id: number; title: string; sourceModuleId: string };
-type RunSummary = { diffSummary: string };
+type RunSummary = { id: number; diffSummary: string };
 
 async function login(page: Page, email: string, password: string) {
   await page.goto('/sign-in');
@@ -54,11 +54,8 @@ test('agent -> propose -> admin approve -> promote -> learner view', async ({ br
     agentPage.locator('[data-action="save_module"]').click(),
   ]);
   expect(createResponse.ok()).toBeTruthy();
-
-  const stagingList = await agentContext.request.get('/api/modules?environment=staging');
-  const stagingModules = (await stagingList.json()) as ModuleSummary[];
-  const createdModule = stagingModules.find((module) => module.title === moduleTitle);
-  sourceModuleId = createdModule?.sourceModuleId || null;
+  const createdModule = (await createResponse.json()) as ModuleSummary;
+  sourceModuleId = createdModule.sourceModuleId || null;
 
   const adminContext = await browser.newContext();
   const adminPage = await adminContext.newPage();
@@ -66,26 +63,36 @@ test('agent -> propose -> admin approve -> promote -> learner view', async ({ br
 
   const runsResponse = await adminContext.request.get('/api/runs');
   const runs = (await runsResponse.json()) as RunSummary[];
-  expect(runs.some((run) => run.diffSummary.includes(moduleTitle))).toBeTruthy();
+  const targetRun = runs.find((run) => run.diffSummary.includes(moduleTitle));
+  expect(targetRun).toBeTruthy();
+  if (!targetRun) {
+    throw new Error('Expected run for agent module.');
+  }
 
   await adminPage.goto('/admin/approvals');
   await expect(
     adminPage.locator('body[data-page="admin_approvals"]')
   ).toBeVisible();
-  await adminPage
-    .locator('[data-form^="approve_rationale_"]')
-    .first()
+  const approvalRow = adminPage.locator(
+    `[data-run-id="${targetRun.id}"][data-run-status="proposed"]`
+  );
+  await expect(approvalRow).toBeVisible();
+  await approvalRow
+    .locator(`[data-form="approve_rationale_${targetRun.id}"]`)
     .fill('Looks good');
-  await adminPage.locator('[data-action="approve_run"]').first().click();
+  await approvalRow.locator('[data-action="approve_run"]').click();
   await expect(
     adminPage.locator('[data-status-code="APPROVE_RUN_SUCCESS"]')
   ).toBeVisible();
 
-  await adminPage
-    .locator('[data-form^="promote_rationale_"]')
-    .first()
+  const approvedRow = adminPage.locator(
+    `[data-run-id="${targetRun.id}"][data-run-status="approved"]`
+  );
+  await expect(approvedRow).toBeVisible();
+  await approvedRow
+    .locator(`[data-form="promote_rationale_${targetRun.id}"]`)
     .fill('Promote to prod');
-  await adminPage.locator('[data-action="promote_run"]').first().click();
+  await approvedRow.locator('[data-action="promote_run"]').click();
   await expect(
     adminPage.locator('[data-status-code="PROMOTE_RUN_SUCCESS"]')
   ).toBeVisible();
