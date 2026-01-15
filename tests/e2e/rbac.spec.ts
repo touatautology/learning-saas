@@ -8,6 +8,14 @@ async function login(page: Page, email: string, password: string) {
   await expect(page).toHaveURL(/\/dashboard/);
 }
 
+async function signUp(page: Page, email: string, password: string) {
+  await page.goto('/sign-up');
+  await page.locator('[data-form="auth"] input[name="email"]').fill(email);
+  await page.locator('[data-form="auth"] input[name="password"]').fill(password);
+  await page.locator('[data-action="sign_up"]').click();
+  await expect(page).toHaveURL(/\/dashboard/);
+}
+
 test('agent cannot write prod modules', async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -48,10 +56,12 @@ test('agent cannot access billing checkout', async ({ browser }) => {
 test('learner without subscription cannot view modules', async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
-  await login(page, 'learner@test.com', 'admin123');
+  const email = `learner-${Date.now()}@test.com`;
+  const password = 'testpass123';
+  await signUp(page, email, password);
 
   await context.request.post('/api/test/subscription', {
-    data: { email: 'learner@test.com', status: 'canceled' },
+    data: { email, status: 'canceled' },
     headers: { 'Content-Type': 'application/json' },
   });
 
