@@ -9,8 +9,10 @@ export const revalidate = 3600;
 
 export default async function PricingPage() {
   const user = await getUser();
-  let prices = [];
-  let products = [];
+  type StripePrice = Awaited<ReturnType<typeof getStripePrices>>[number];
+  type StripeProduct = Awaited<ReturnType<typeof getStripeProducts>>[number];
+  let prices: StripePrice[] = [];
+  let products: StripeProduct[] = [];
   try {
     [prices, products] = await Promise.all([
       getStripePrices(),

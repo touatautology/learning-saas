@@ -25,8 +25,8 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dotenv": "^16.5.0",
     "dompurify": "^3.0.9",
+    "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.1",
     "drizzle-orm": "^0.43.1",
     "jose": "^6.0.11",
@@ -49,8 +49,9 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.2",
-    "@types/dompurify": "^3.0.5",
     "@playwright/test": "^1.51.1",
+    "@types/dompurify": "^3.0.5",
+    "baseline-browser-mapping": "^2.9.14",
     "eslint": "^9.2.0",
     "eslint-config-next": "15.6.0-canary.59",
     "tsx": "^4.19.2"

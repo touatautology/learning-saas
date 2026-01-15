@@ -50,12 +50,18 @@ test('promote uses sourceModuleId even with duplicate titles', async ({ browser 
   await login(adminPage, 'admin@test.com', 'admin123');
 
   const runsResponse = await adminContext.request.get('/api/runs');
-  const runs = await runsResponse.json();
+  const runs = (await runsResponse.json()) as Array<{
+    id: number;
+    changedEntityIdsJson: number[] | null;
+  }>;
   const targetRun = runs.find((run) =>
     Array.isArray(run.changedEntityIdsJson) &&
     run.changedEntityIdsJson.includes(secondModule.id)
   );
   expect(targetRun).toBeTruthy();
+  if (!targetRun) {
+    throw new Error('Expected run for second module');
+  }
 
   const approveResponse = await adminContext.request.post(
     `/api/approvals/${targetRun.id}`,
@@ -76,7 +82,10 @@ test('promote uses sourceModuleId even with duplicate titles', async ({ browser 
   const prodResponse = await adminContext.request.get(
     '/api/modules?environment=prod'
   );
-  const prodModules = await prodResponse.json();
+  const prodModules = (await prodResponse.json()) as Array<{
+    id: number;
+    sourceModuleId: string | null;
+  }>;
 
   const hasSecond = prodModules.some(
     (module) => module.sourceModuleId === secondModule.sourceModuleId
