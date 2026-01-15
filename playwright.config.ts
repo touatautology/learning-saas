@@ -12,8 +12,11 @@ export default defineConfig({
       PORT: '3002',
       ENABLE_TEST_ENDPOINTS: 'true',
       SKIP_STRIPE_FETCH: 'true',
+      NODE_ENV: 'test',
+      BROWSERSLIST_IGNORE_OLD_DATA: '1',
     },
     url: process.env.BASE_URL || 'http://localhost:3002',
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
 });
