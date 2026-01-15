@@ -1,10 +1,10 @@
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { auditLogs, users } from '@/lib/db/schema';
 import { getUser } from '@/lib/db/queries';
 import { requireRole } from '@/lib/auth/rbac';
 
-export async function GET() {
+export async function GET(request: Request) {
   const user = await getUser();
   if (!user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -19,7 +19,23 @@ export async function GET() {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const results = await db
+  const url = new URL(request.url);
+  const entityType = url.searchParams.get('entityType');
+  const entityId = url.searchParams.get('entityId');
+  const action = url.searchParams.get('action');
+
+  const filters = [];
+  if (entityType) {
+    filters.push(eq(auditLogs.entityType, entityType));
+  }
+  if (entityId) {
+    filters.push(eq(auditLogs.entityId, entityId));
+  }
+  if (action) {
+    filters.push(eq(auditLogs.action, action));
+  }
+
+  let query = db
     .select({
       id: auditLogs.id,
       action: auditLogs.action,
@@ -35,9 +51,13 @@ export async function GET() {
       actorEmail: users.email,
     })
     .from(auditLogs)
-    .leftJoin(users, eq(auditLogs.actorUserId, users.id))
-    .orderBy(desc(auditLogs.createdAt))
-    .limit(50);
+    .leftJoin(users, eq(auditLogs.actorUserId, users.id));
+
+  if (filters.length) {
+    query = query.where(and(...filters));
+  }
+
+  const results = await query.orderBy(desc(auditLogs.createdAt)).limit(50);
 
   return Response.json(results);
 }

@@ -15,7 +15,7 @@ export default function AdminRunsPage() {
       <div className="grid gap-6">
         {runs?.length ? (
           runs.map((run) => (
-            <Card key={run.id} data-run-id={run.id}>
+            <Card key={run.id} data-run-id={run.id} id={`run-${run.id}`}>
               <CardHeader>
                 <CardTitle>
                   {run.actionType} · {run.status}
