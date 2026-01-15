@@ -1,0 +1,16 @@
+'use client';
+
+import BodyDataPage from '@/components/body-data-page';
+
+export default function LoginLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <BodyDataPage />
+      {children}
+    </section>
+  );
+}
