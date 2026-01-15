@@ -50,7 +50,6 @@ CREATE TABLE IF NOT EXISTS "runs" (
 	"evaluation_json" jsonb NOT NULL,
 	"rationale" text NOT NULL,
 	"status" varchar(20) NOT NULL,
-	"commit_hash" varchar(64),
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
