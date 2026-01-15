@@ -8,6 +8,13 @@
       "when": 1726443359662,
       "tag": "0000_soft_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1736960000000,
+      "tag": "0001_add_commit_hash_to_runs",
+      "breakpoints": true
     }
   ]
 }
