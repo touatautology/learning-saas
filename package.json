@@ -11,7 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "test:e2e": "playwright test",
     "test:rbac": "playwright test tests/e2e/rbac.spec.ts",
-    "test:unit": "tsx --test tests/unit/**/*.test.ts",
+    "test:unit": "tsx --test tests/unit/*.test.ts",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "ci:record": "pnpm exec tsx scripts/record-ci.ts"
