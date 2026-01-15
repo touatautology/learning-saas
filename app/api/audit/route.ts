@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     filters.push(eq(auditLogs.action, action));
   }
 
-  let query = db
+  const baseQuery = db
     .select({
       id: auditLogs.id,
       action: auditLogs.action,
@@ -53,11 +53,12 @@ export async function GET(request: Request) {
     .from(auditLogs)
     .leftJoin(users, eq(auditLogs.actorUserId, users.id));
 
-  if (filters.length) {
-    query = query.where(and(...filters));
-  }
-
-  const results = await query.orderBy(desc(auditLogs.createdAt)).limit(50);
+  const results = await (filters.length
+    ? baseQuery.where(and(...filters))
+    : baseQuery
+  )
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(50);
 
   return Response.json(results);
 }
